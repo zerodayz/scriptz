@@ -1,0 +1,198 @@
+#!/bin/bash
+set -e
+
+usage() {
+cat<<EOF
+Usage:
+  $0 [-q | -h] REPO [-- CMD ARGS...]
+
+Options:
+  -q     Print eval-friendly commands to configure the current shell.
+  -h     Show this message.
+
+Arguments:
+  REPO   Specifies GitHub repository or another resource for the Go package to
+         be downloaded. Allowed formats:
+           * user/repo                            (github-only)
+           * https://github.com/user/repo(.git)   (github-only)
+           * git@github.com:user/repo.git         (github-only)
+           * labix.org/mgo.1                      (go-get path)
+
+  [-- CMD ARGS]
+        Specifies the command to be executed in the package's environment. If
+        omitted, an interactive shell will be started.
+
+Examples:
+  $ goclone ahmetb/govvv
+  $ eval \$(goclone -q k8s.io/kubernetes)
+  $ goclone https://github.com/pkg/errors -- cat LICENSE
+
+  # ensures k8s.io/kubernetes is cloned at normal location in workspace,
+  # then (on first run) creates a branch-specific workspace directory, with
+  # a git worktree for the corresponding branch setup in the usual relative GOPATH location.
+  $ goclone k8s.io/kubernetes@feature1
+EOF
+}
+
+WORKSPACE="${WORKSPACE:-"${HOME}/workspace"}"
+
+quiet=
+user=
+repo=
+github=
+github_ssh=
+go_get_url=
+
+# parse command line arguments
+while getopts qh opt; do
+    case "${opt}" in
+        q)
+            quiet="true"
+            ;;
+        h)
+            usage; exit 1;;
+        ?)
+            echo "Run with \"-h\" for help." >&2
+            exit 1
+    esac
+done
+shift $((OPTIND - 1))
+
+# at least one positional argument required
+if [[ $# -lt 1 ]]; then
+    echo "$0: missing argument REPO" >&2
+    exit 1
+fi
+
+# first positional argument is the repository
+src="$1"
+shift
+
+# parse the remainder of arguments, preserve them to pass it to the new shell
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --)
+        shift;break;;
+    *)
+        echo "$0: unrecognized extra positional argument: $1" >&2
+        exit 1
+    esac
+done
+exeargs=$*
+
+# is githubUser/github_repo
+if [[ "$src" =~ ^([A-Za-z0-9-]+)\/([A-Za-z0-9_-]+)(\@(.*))?$ ]]; then
+    user="${BASH_REMATCH[1]}"
+    repo="${BASH_REMATCH[2]}"
+    branch_name="${BASH_REMATCH[4]}"
+    [[ ! -z "${BASH_REMATCH[4]}" ]] && src="${src:0:$(( ${#src} - ${#BASH_REMATCH[3]} ))}"
+    github="true"
+    hub_syntax="true"
+
+# is git@github.com:user/repo.git
+elif [[ "$src" =~ ^git@github\.com:([A-Za-z0-9-]+)\/([A-Za-z0-9_-]+)\.git(\@(.*))?$ ]]; then
+    user="${BASH_REMATCH[1]}"
+    repo="${BASH_REMATCH[2]}"
+    branch_name="${BASH_REMATCH[4]}"
+    [[ ! -z "${BASH_REMATCH[4]}" ]] && src="${src:0:$(( ${#src} - ${#BASH_REMATCH[3]} ))}"
+    github="true"
+    github_ssh="true"
+
+# is http(s)://github.com/user/repo(.git)
+elif [[ "$src" =~ ^https?://github\.com/([A-Za-z0-9-]+)\/([A-Za-z0-9_-]+)(\.git)?(\@(.*))?$ ]]; then
+    user="${BASH_REMATCH[1]}"
+    repo="${BASH_REMATCH[2]}"
+    branch_name="${BASH_REMATCH[5]}"
+    [[ ! -z "${BASH_REMATCH[4]}" ]] && src="${src:0:$(( ${#src} - ${#BASH_REMATCH[4]} ))}"
+    github="true"
+
+# is go-get path (e.g. github.com/user/repo/pkg/subpkg, k8s.io/kubernetes, labix.org/mgo.v1)
+elif [[ "$src" =~ ^([a-zA-Z0-9_\-]+[\.a-zA-Z0-9_\-]+)+(\/[A-Za-z0-9\._\-]+)+(\@(.*))?$ ]]; then
+    branch_name="${BASH_REMATCH[4]}"
+    [[ ! -z "${BASH_REMATCH[4]}" ]] && src="${src:0:$(( ${#src} - ${#BASH_REMATCH[3]} ))}"
+    go_get_url="$src"
+    repo="${src//[\.\/]/-}" # replace '/' with '-'
+else
+    echo "$0: invalid REPO format \"${src}\".">&2
+    exit 1
+fi
+
+# project is the primary clone location (use of @branch feature assumes git...)
+project="$WORKSPACE/gopath-${repo}"
+branch_project="${project}${branch_name:+@${branch_name}}"
+clone_path=
+if [[ "$github" == "true" ]]; then
+    clone_path="$project/src/github.com/${user}/${repo}"
+    branch_clone_path="$branch_project/src/github.com/${user}/${repo}"
+else
+    clone_path="$project/src/${go_get_url}"
+    branch_clone_path="$branch_project/src/${go_get_url}"
+fi
+
+# TODO(ahmetb) if $GITHUB_USERNAME or ~/.github_username, add a remote called
+# "my" pointing to user's fork in case of github.
+
+# TODO(ahmetb) make sure clone errors surface as exit code in the script
+
+# clone the repo if necessary
+if [[ ! -d "${clone_path}" ]]; then
+    if [[ "$github" == "true" ]]; then
+        if [[ -x "$(command -v hub)" && -z "${FORCE_GIT}" ]]; then
+            # use hub(1)
+            (
+                set -ex
+                hub clone -q "${user}/${repo}" "${clone_path}"
+            )
+        else
+            git_url="$src"
+            if "$hub_syntax" == "true" ]]; then
+                git_url="https://github.com/${user}/${repo}"
+            fi
+            [[ "$git_url" == *.git ]] || git_url+=".git"
+
+            (
+                set -ex
+                git clone -q "${git_url}" "${clone_path}"
+            )
+        fi
+    else
+        (
+            set -ex
+            env  GOPATH="${project}" go get -d "${go_get_url}"
+        )
+    fi
+fi
+
+if [[ ! -z "${branch_name:-}" ]]; then
+    if [[ ! -d "${branch_project}" ]]; then
+        (
+            cd "${clone_path}"
+            git worktree add "${branch_clone_path}" "${branch_name}"
+        )
+    fi
+    project="${branch_project}"
+    clone_path="${branch_clone_path}"
+fi
+
+if [[ "$quiet" == "true" ]]; then
+    # print commands to prepare env
+    echo "    export GOPATH=\"${project}\";"
+    echo "    export PATH=\"${project}/bin:\${PATH}\";"
+    echo "    cd \"${clone_path}\";"
+else
+    if [[ -n "$exeargs" ]]; then
+    # run command in env
+    (
+        cd "${clone_path}"
+        env GOPATH="${project}" PATH="${project}/bin:${PATH}" $SHELL -c "${exeargs[@]}"
+    )
+    else
+    # start an interactive shell with env
+    (
+        cd "${clone_path}"
+        echo -e "\033[32mgoclone: Starting a new shell in GOPATH=${project}$(tput sgr0)" >&2
+        env GOPATH="${project}" PATH="${project}/bin:${PATH}" $SHELL || true
+        echo -e "\033[32mgoclone: Shell exited.$(tput sgr0)" >&2
+    )
+    fi
+fi
