@@ -1,0 +1,50 @@
+variant: fcos
+version: 1.0.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCw3TJvwKZCL1qIZAlm6eWEzMIOSpMoposCu0jsrMq/sudJ13G6Y3Z0K2Cw+bkz7n1zx5AwtaAyHkdsk2TWOjZyaPdZFXQim1mmWQGZXDJV1hxPnAPtwDKsRWRKvHe+mi25UT+RaWeQAiB2hI0B1+O5MdCcIR4Yxp9/fPB/WYMAI2pM0a76X3HA/+YA7Y/XHDtJFuja3JEhY2nZ8VjoOLsCjN+NfLSDA7d9aOsZ9jm9Z14XA3uOWNW7jxshD7zcVKIqW2JG1JEY/llN1XPXNPPWQ14MztXJYZhDxSQnLGBLCvoqxF0Uu6rRtw8mLDFRQTsYgzu/Gr+RnAUztGNUvAXh rcernin@dhcp-27-71.brq.redhat.com
+storage:
+  files:
+    - path: /etc/NetworkManager/system-connections/eth0.nmconnection
+      mode: 0600
+      overwrite: true
+      contents:
+        inline: |
+          [connection]
+          type=ethernet
+          interface-name=eth0
+
+          [ipv4]
+          method=manual
+          addresses=192.168.122.11/24
+          gateway=192.168.122.1
+          dns=192.168.168.122.1;8.8.8.8
+systemd:
+  units:
+    - name: etcd-member.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run single node etcd
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        ExecStartPre=mkdir -p /var/lib/etcd
+        ExecStartPre=-/bin/podman kill etcd
+        ExecStartPre=-/bin/podman rm etcd
+        ExecStartPre=-/bin/podman pull quay.io/coreos/etcd
+        ExecStart=/bin/podman run --name etcd --volume /var/lib/etcd:/etcd-data:z --net=host quay.io/coreos/etcd:latest /usr/local/bin/etcd --data-dir /etcd-data --name node1 \
+                --initial-advertise-peer-urls http://127.0.0.1:2380 --listen-peer-urls http://127.0.0.1:2380 \
+                --advertise-client-urls http://127.0.0.1:2379 \
+                --listen-client-urls http://0.0.0.0:2379 \
+                --initial-cluster node1=http://127.0.0.1:2380
+
+        ExecStop=/bin/podman stop etcd
+
+        [Install]
+        WantedBy=multi-user.target
+
+
