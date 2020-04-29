@@ -34,9 +34,9 @@ openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial
 export WORKER_FQDN="fcos-worker"
 export WORKER_IP=192.168.122.15
 
-openssl genrsa -out ${WORKER_FQDN}-worker-key.pem 2048
-openssl req -new -key ${WORKER_FQDN}-worker-key.pem -out ${WORKER_FQDN}-worker.csr -subj "/CN=${WORKER_FQDN}" -config worker-openssl.cnf
-openssl x509 -req -in ${WORKER_FQDN}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${WORKER_FQDN}-worker.pem -days 365 -extensions v3_req -extfile worker-openssl.cnf
+openssl genrsa -out ${WORKER_FQDN}-key.pem 2048
+openssl req -new -key ${WORKER_FQDN}-key.pem -out ${WORKER_FQDN}.csr -subj "/CN=${WORKER_FQDN}" -config worker-openssl.cnf
+openssl x509 -req -in ${WORKER_FQDN}.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${WORKER_FQDN}.pem -days 365 -extensions v3_req -extfile worker-openssl.cnf
 
 ## generate cluster administration keypair
 openssl genrsa -out admin-key.pem 2048
