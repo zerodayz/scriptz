@@ -1,0 +1,39 @@
+$TTL    604800
+@       IN      SOA     ns1.fcos.k8s.local. admin.fcos.k8s.local. (
+                  1     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800     ; Negative Cache TTL
+)
+
+; name servers - NS records
+    IN      NS      ns1
+
+; name servers - A records
+ns1.fcos.k8s.local.          IN      A       192.168.122.1
+
+
+; OpenShift Container Platform Cluster - A records
+
+fedora-bootstrap.fcos.k8s.local.              IN      A      192.168.122.9
+fedora-master-0.fcos.k8s.local.               IN      A      192.168.122.10
+fedora-master-1.fcos.k8s.local.               IN      A      192.168.122.11
+fedora-master-2.fcos.k8s.local.               IN      A      192.168.122.12
+fedora-worker-0.fcos.k8s.local.               IN      A      192.168.122.13
+
+; OpenShift internal cluster IPs - A records
+api.fcos.k8s.local.        IN    A    192.168.122.1
+api-int.fcos.k8s.local.    IN    A    192.168.122.1
+*.apps.fcos.k8s.local.     IN    A    192.168.122.1
+etcd-0.fcos.k8s.local.     IN    A    192.168.122.10
+etcd-1.fcos.k8s.local.     IN    A    192.168.122.11
+etcd-2.fcos.k8s.local.     IN    A    192.168.122.12
+
+console-openshift-console.apps.fcos.k8s.local.          IN     A     192.168.122.1
+oauth-openshift.apps.fcos.k8s.local.                    IN     A     192.168.122.1
+
+; OpenShift internal cluster IPs - SRV records
+_etcd-server-ssl._tcp.fcos.k8s.local.                   86400     IN    SRV     0    10    2380    etcd-0.fcos.k8s.local
+_etcd-server-ssl._tcp.fcos.k8s.local.                   86400     IN    SRV     0    10    2380    etcd-1.fcos.k8s.local
+_etcd-server-ssl._tcp.fcos.k8s.local.                   86400     IN    SRV     0    10    2380    etcd-2.fcos.k8s.local
