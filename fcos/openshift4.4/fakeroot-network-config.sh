@@ -1,3 +1,5 @@
+mkdir -p fedora-{bootstrap,master-0,master-1,master-2,worker-0}/etc/sysconfig/network-scripts
+
 cat > fedora-bootstrap/etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF
 DEVICE=eth0
 BOOTPROTO=none
