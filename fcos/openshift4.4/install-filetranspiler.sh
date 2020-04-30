@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git clone git@github.com:zerodayz/filetranspiler.git filetranspiler
+git clone  https://github.com/zerodayz/filetranspiler.git filetranspiler
 pushd filetranspiler
 podman build . -t filetranspiler:latest
 popd
