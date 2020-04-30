@@ -12,10 +12,10 @@ INTERFACE=eth0
 DNS=192.168.122.1
 
 # Prepare the disk
-qemu-img create -f qcow2 /var/lib/libvirt/images/$SERVER.qcow2 20G
+qemu-img create -f qcow2 /var/lib/libvirt/images/$SERVER.qcow 20G
 
 # Create Domain in the Virt-Manager
 virt-install --connect qemu:///system -n $SERVER -r 2048 --os-variant=fedora31 --import \
-        --graphics=none --disk path=/var/lib/libvirt/images/$SERVER.qcow2 \
+        --graphics=none --disk path=/var/lib/libvirt/images/$SERVER.qcow \
 	--boot kernel=$KERNEL,initrd=$INITRD,kernel_args="ip=$IPADDR::$DEFAULTGW:$NETMASK:$SERVER:$INTERFACE:none:$DNS rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://192.168.122.1:8000/$DISK coreos.inst.ignition_url=http://192.168.122.1:8000/ignition/$ROLE.ign" \
         --network default
