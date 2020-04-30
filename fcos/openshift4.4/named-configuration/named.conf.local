@@ -1,0 +1,8 @@
+zone "fcos.k8s.local" {
+    type master;
+    file "/var/named/zones/db.fcos.k8s.local"; # zone file path
+};
+zone "122.168.192.in-addr.arpa" {
+    type master;
+    file "/var/named/zones/db.192.168.122";  # 192.168.122.0/24 subnet
+};
