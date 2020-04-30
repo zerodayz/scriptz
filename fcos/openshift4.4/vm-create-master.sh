@@ -15,7 +15,7 @@ DNS=192.168.122.1
 qemu-img create -f qcow2 /var/lib/libvirt/images/$SERVER.qcow 40G
 
 # Create Domain in the Virt-Manager
-virt-install --connect qemu:///system -n $SERVER -r 16384 --os-variant=fedora31 --import \
+virt-install --connect qemu:///system --vcpus 4 -n $SERVER -r 16384 --os-variant=fedora31 --import \
         --disk path=/var/lib/libvirt/images/$SERVER.qcow,bus=virtio \
 	--boot kernel=$KERNEL,initrd=$INITRD,kernel_args="ip=$IPADDR::$DEFAULTGW:$NETMASK:$SERVER:$INTERFACE:none:$DNS rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=vda coreos.inst.image_url=http://192.168.122.1:8000/$DISK coreos.inst.ignition_url=http://192.168.122.1:8000/ignition/$ROLE-${1}.ign" \
         --network network=openshift
