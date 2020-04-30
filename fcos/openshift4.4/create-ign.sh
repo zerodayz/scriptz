@@ -5,4 +5,8 @@ if [ -d deploy ]; then
     exit 1
 fi
 mkdir deploy
-openshift-install create ignition-configs --dir=deploy/
+cp install-config.yaml deploy/
+
+pushd deploy
+openshift-install create ignition-configs 
+popd
