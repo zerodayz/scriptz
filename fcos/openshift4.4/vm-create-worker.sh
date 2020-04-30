@@ -1,7 +1,7 @@
 #!/bin/bash
 ROLE=worker
 SERVER=fedora-worker-0
-INITRD=images/fedora-coreos-31.20200407.3.0-live-initramfs.x86_64.img
+INITRD=images/fedora-coreos-31.20191210.3.0-live-initramfs.x86_64.img
 KERNEL=images/fedora-coreos-31.20191210.3.0-installer-kernel-x86_64
 DISK=images/fedora-coreos-31.20191210.3.0-metal.x86_64.raw.xz
 
