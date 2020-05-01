@@ -597,3 +597,13 @@ INFO To access the cluster as the system:admin user when using 'oc', run 'export
 INFO Access the OpenShift web-console here: https://console-openshift-console.apps.fcos.k8s.local 
 INFO Login to the console with user: kubeadmin, password: XXXXXX
 ```
+
+The outcome is 3 masters and 1 worker node
+
+```
+NAME              STATUS   ROLES    AGE     VERSION
+fedora-master-0   Ready    master   4h58m   v1.17.1
+fedora-master-1   Ready    master   3h14m   v1.17.1
+fedora-master-2   Ready    master   3h14m   v1.17.1
+fedora-worker-0   Ready    worker   58m     v1.17.1
+```
