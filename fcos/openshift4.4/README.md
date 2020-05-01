@@ -548,3 +548,52 @@ cd /root/kubernetes/fcos/openshift4.4/
 bash finished-bootstrap.sh
 ```
 
+## Worker nodes
+
+After all your master nodes are healthy and running
+
+```
+kubectl get nodes
+NAME              STATUS   ROLES    AGE     VERSION
+fedora-master-0   Ready    master   3h46m   v1.17.1
+fedora-master-1   Ready    master   122m    v1.17.1
+fedora-master-2   Ready    master   122m    v1.17.1
+```
+
+And you are not seeing any pods **crashing**
+
+Start up your worker nodes and they will bootstrap off the masters.
+
+
+If everything went fine, here is what you should see
+
+```
+# openshift-install wait-for install-complete --log-level debug
+DEBUG OpenShift Installer 4.4.0-0.okd-2020-04-21-163702-beta4 
+DEBUG Built from commit 05427285086348912f5183c0ac39094c75e0c1db 
+DEBUG Fetching Install Config...                   
+DEBUG Loading Install Config...                    
+DEBUG   Loading SSH Key...                         
+DEBUG   Loading Base Domain...                     
+DEBUG     Loading Platform...                      
+DEBUG   Loading Cluster Name...                    
+DEBUG     Loading Base Domain...                   
+DEBUG     Loading Platform...                      
+DEBUG   Loading Pull Secret...                     
+DEBUG   Loading Platform...                        
+DEBUG Using Install Config loaded from state file  
+DEBUG Reusing previously-fetched Install Config    
+INFO Waiting up to 30m0s for the cluster at https://api.fcos.k8s.local:6443 to initialize... 
+DEBUG Still waiting for the cluster to initialize: Working towards 4.4.0-0.okd-2020-04-21-163702-beta4: 99% complete 
+DEBUG Still waiting for the cluster to initialize: Cluster operator authentication is still updating 
+DEBUG Still waiting for the cluster to initialize: Cluster operator authentication is still updating 
+DEBUG Cluster is initialized                       
+INFO Waiting up to 10m0s for the openshift-console route to be created... 
+DEBUG Route found in openshift-console namespace: console 
+DEBUG Route found in openshift-console namespace: downloads 
+DEBUG OpenShift console route is created           
+INFO Install complete!                            
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/kubernetes/fcos/openshift4.4/deploy/auth/kubeconfig' 
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.fcos.k8s.local 
+INFO Login to the console with user: kubeadmin, password: XXXXXX
+```
