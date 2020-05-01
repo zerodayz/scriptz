@@ -8,6 +8,7 @@ Running external CoreDNS and resolving your pods running in Kubernetes cluster.
    kubernetes cluster.local {
     endpoint https://api-fcos-k8s-local:6443
     kubeconfig /home/robin/.kube/config default/api-fcos-k8s-local:6443/system:admin
+    pods insecure
   }
 }
 ```
