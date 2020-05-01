@@ -1,4 +1,4 @@
-# OpenShift 4.4 UPI (wip)
+# OpenShift 4.4 UPI
 Note: This is not official guide, it doesn't contain recommended practices, neither recommended HW requirements.
 
 # Requirements
