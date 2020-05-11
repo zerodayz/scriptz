@@ -10,7 +10,7 @@ LABEL maintainer="Robin Cernin <cerninr@gmail.com>"
 WORKDIR /app
 
 # Copy the source from the current directory to the Working Directory inside the container
-COPY . .
+RUN curl -SL https://raw.githubusercontent.com/zerodayz/kubernetes/master/readyz/readyz.go -o readyz.go
 
 # Build the Go app
 RUN go build -o readyz .
