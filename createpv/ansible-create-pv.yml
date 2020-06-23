@@ -1,0 +1,10 @@
+---
+  - name: Create PVs in OpenShift
+    hosts: localhost
+    connection: local
+    vars_files:
+      - pv-vars.yml
+    gather_facts: no
+    tasks:
+      - name: Create the PVs based on the template
+        template: src=create-pv.j2 dest=./oc-pv-create-apply.yaml

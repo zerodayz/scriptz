@@ -1,0 +1,41 @@
+---
+  vol:
+    - name: vol1
+      size: 2Gi
+    - name: vol2
+      size: 2Gi
+    - name: vol3
+      size: 2Gi
+    - name: vol4
+      size: 2Gi
+    - name: vol5
+      size: 2Gi
+    - name: vol6
+      size: 2Gi
+    - name: vol7
+      size: 2Gi
+    - name: vol8
+      size: 2Gi
+    - name: vol9
+      size: 2Gi
+    - name: vol10
+      size: 20Gi
+    - name: vol11
+      size: 20Gi
+    - name: vol12
+      size: 20Gi
+    - name: vol13
+      size: 20Gi
+    - name: vol14
+      size: 20Gi
+    - name: vol15
+      size: 20Gi
+    - name: vol16
+      size: 20Gi
+    - name: vol17
+      size: 20Gi
+    - name: vol18
+      size: 20Gi
+    - name: vol19
+      size: 20Gi
+
