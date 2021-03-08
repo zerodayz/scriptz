@@ -1,0 +1,17 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cron
+spec:
+  failedJobsHistoryLimit: 5
+  template:
+    spec:
+      containers:
+      - name: cron
+        image: registry.redhat.io/ubi8/ubi-minimal
+      restartPolicy: OnFailure
+  schedule: "* * * * *"
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  suspend: false
